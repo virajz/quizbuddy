@@ -31,6 +31,7 @@ export default function RootLayout({
                         <Link href="/" className="font-semibold">QuizBuddy</Link>
                         <Link href="/quiz" className="hover:text-primary transition-colors">Quiz</Link>
                         <Link href="/study" className="hover:text-primary transition-colors">Q&A</Link>
+                        <Link href="/brainstorm" className="hover:text-primary transition-colors">Brainstorm</Link>
                     </nav>
                 </header>
                 <main className="flex-1">{children}</main>

@@ -20,3 +20,11 @@ export async function logQuizEvent(data: Record<string, any>) {
         // swallow logging errors
     }
 }
+
+export async function logChatEvent(data: Record<string, any>) {
+    try {
+        await addDoc(collection(db, "chatLogs"), { ...data, ts: serverTimestamp() });
+    } catch {
+        // ignore logging errors for chat
+    }
+}
