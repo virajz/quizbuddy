@@ -12,3 +12,11 @@ export async function logQAServerEvent(data: Record<string, any>) {
         // no-op in v1; avoid breaking API on logging failures
     }
 }
+
+export async function logQuizEvent(data: Record<string, any>) {
+    try {
+        await addDoc(collection(db, "quizLogs"), { ...data, ts: serverTimestamp() });
+    } catch {
+        // swallow logging errors
+    }
+}
