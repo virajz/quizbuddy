@@ -18,8 +18,12 @@ export async function POST(req: NextRequest) {
         const response = toAskQuestionResponse(content, { latencyMs, model });
 
         // fire-and-forget logging
-        logQAServerEvent({ type: "answer_generated", latencyMs, model, qLen: input.question.length })
+        logQAServerEvent({ type: "answer_generated", latencyMs, model, qLen: input.question.length, resources: response.answer.resources?.length ?? 0 })
             .catch(() => { /* swallow logging errors */ });
+        if (response.answer.resources?.length) {
+            logQAServerEvent({ type: "resources_suggested", count: response.answer.resources.length })
+                .catch(() => { /* swallow logging errors */ });
+        }
 
         return NextResponse.json(response, { status: 200 });
     } catch (err: any) {

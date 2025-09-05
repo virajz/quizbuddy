@@ -7,6 +7,8 @@ import type { AskQuestionResponse, HistoryEntry } from "../types/qa.types";
 type QAContextValue = ReturnType<typeof useAskQuestion> & {
     prefillQuestion: string;
     setPrefillQuestion: (q: string) => void;
+    selectedHistoryId: string | null;
+    setSelectedHistoryId: (id: string | null) => void;
 };
 
 const QAContext = createContext<QAContextValue | null>(null);
@@ -14,10 +16,11 @@ const QAContext = createContext<QAContextValue | null>(null);
 export function QAProvider({ children }: { children: React.ReactNode }) {
     const qa = useAskQuestion(); // single source of truth for both panels
     const [prefillQuestion, setPrefillQuestion] = useState("");
+    const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
 
     const value = useMemo(
-        () => ({ ...qa, prefillQuestion, setPrefillQuestion }),
-        [qa, prefillQuestion]
+        () => ({ ...qa, prefillQuestion, setPrefillQuestion, selectedHistoryId, setSelectedHistoryId }),
+        [qa, prefillQuestion, selectedHistoryId]
     );
 
     return <QAContext.Provider value={value}>{children}</QAContext.Provider>;
