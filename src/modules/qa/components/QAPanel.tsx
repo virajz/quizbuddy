@@ -47,7 +47,7 @@ export function QAPanel() {
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label>Level</Label>
-                                <Select value={level} onValueChange={(v) => setLevel(v as any)}>
+                                <Select value={level} onValueChange={(v) => setLevel(v as "beginner" | "intermediate")}>
                                     <SelectTrigger className="w-full h-11">
                                         <SelectValue placeholder="Level" />
                                     </SelectTrigger>
@@ -60,7 +60,7 @@ export function QAPanel() {
 
                             <div className="grid gap-2">
                                 <Label>Language</Label>
-                                <Select value={locale} onValueChange={(v) => setLocale(v as any)}>
+                                <Select value={locale} onValueChange={(v) => setLocale(v as "en" | "hi" | "gu")}>
                                     <SelectTrigger className="w-full h-11">
                                         <SelectValue placeholder="Language" />
                                     </SelectTrigger>

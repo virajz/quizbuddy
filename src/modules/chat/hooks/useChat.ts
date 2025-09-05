@@ -70,8 +70,11 @@ export function useChat() {
                     } catch { /* ignore malformed segment */ }
                 }
             }
-        } catch (e: any) {
-            if (e.name !== "AbortError") setError(e?.message || "Stream error");
+        } catch (e: unknown) {
+            if (!(e instanceof DOMException && e.name === "AbortError")) {
+                const msg = e instanceof Error ? e.message : "Stream error";
+                setError(msg);
+            }
         } finally { setLoading(false); setStreaming(false); abortRef.current = null; }
     }, [append, messages, sessionId]);
 
@@ -112,9 +115,9 @@ export function useChat() {
             } else {
                 setError("Empty transcript");
             }
-        } catch (e: any) { setError(e?.message || "Transcription failed"); }
+        } catch (e: unknown) { setError(e instanceof Error ? e.message : "Transcription failed"); }
         finally { setTranscribing(false); }
-    }, [send]);
+    }, []);
 
     useEffect(() => {
         // auto-scroll handled in MessageList; just dependency placeholder
@@ -136,8 +139,8 @@ export function useChat() {
             setError(null);
             setStreaming(false); setLoading(false); setTranscribing(false);
             setHistory(loadChatHistory());
-        } catch (e: any) {
-            setError(e?.message || "Failed to load session");
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : "Failed to load session");
         }
     }, [messages, sessionId]);
 

@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCcw, ChevronLeft, Loader2 } from "lucide-react";
 import { useQuizContext } from "../state/QuizContext";
+import type { QuizQuestion } from "../types/quiz.types";
 
 export function ResultsSummary() {
-    const { quiz, answers, reset, generate, loading } = useQuizContext() as any;
+    const { quiz, answers, reset, generate, loading } = useQuizContext();
     if (!quiz) return null;
-    const score = quiz.questions.reduce((acc: number, q: any) => acc + (answers.get(q.id) === q.correctOptionId ? 1 : 0), 0);
+    const score = quiz.questions.reduce((acc: number, q: QuizQuestion) => acc + (answers.get(q.id) === q.correctOptionId ? 1 : 0), 0);
 
     return (
         <Card>
@@ -18,7 +19,7 @@ export function ResultsSummary() {
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="space-y-4">
-                    {quiz.questions.map((q: any) => {
+                    {quiz.questions.map((q) => {
                         const chosen = answers.get(q.id);
                         const correct = chosen === q.correctOptionId;
                         return (
@@ -28,7 +29,7 @@ export function ResultsSummary() {
                                     <Badge variant={correct ? "secondary" : "outline"}>{correct ? "Correct" : "Incorrect"}</Badge>
                                 </div>
                                 <div className="text-sm">
-                                    <strong>Answer:</strong> {q.correctOptionId}. {q.options.find((o: any) => o.id === q.correctOptionId)?.text}
+                                    <strong>Answer:</strong> {q.correctOptionId}. {q.options.find(o => o.id === q.correctOptionId)?.text}
                                 </div>
                                 <div className="text-sm opacity-90">{q.explanation}</div>
                             </div>

@@ -1,6 +1,5 @@
 // /modules/quiz/validation.ts
 import { z } from "zod";
-import type { QuizOptionId } from "./types/quiz.types";
 
 export const quizGenerateRequestSchema = z.object({
     topic: z.string().min(3, "topic too short").max(120, "topic too long"),

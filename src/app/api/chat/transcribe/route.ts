@@ -20,16 +20,23 @@ export async function POST(req: NextRequest) {
     // Build a File for SDK (Node 18 provides global File)
     const uint8 = new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
     // Cast to any due to TS lib mismatch with Node's polyfilled File / BlobPart types
-    const file = new File([uint8 as any], `audio.${extFromMime(body.audioMime)}`, { type: body.audioMime });
-    let model = "distil-whisper-large-v3";
-    let result: any;
+    // Ensure a plain ArrayBuffer is passed to File for broad lib compatibility
+    const copy = new Uint8Array(uint8.byteLength);
+    copy.set(uint8);
+    const file = new File([copy], `audio.${extFromMime(body.audioMime)}`, { type: body.audioMime });
+    let model: string = "distil-whisper-large-v3";
+    interface WhisperResult { text?: string; language?: string }
+    let result: WhisperResult | null = null;
     try {
         result = await groq.audio.transcriptions.create({ file, model });
-    } catch (e) {
+    } catch {
         model = "whisper-large-v3";
-        try { result = await groq.audio.transcriptions.create({ file, model }); } catch (e2: any) { return new Response(e2?.message || "Transcription error", { status: 500 }); }
+        try { result = await groq.audio.transcriptions.create({ file, model }); } catch (e2: unknown) {
+            const msg = e2 instanceof Error ? e2.message : "Transcription error";
+            return new Response(msg, { status: 500 });
+        }
     }
-    const text: string = result?.text || "";
+    const text: string = result?.text ?? "";
     const language: string | undefined = result?.language;
     const response: TranscribeResponse = { text, language };
     logChatEvent({ type: "stt", model, bytes: buf.byteLength }).catch(() => { });

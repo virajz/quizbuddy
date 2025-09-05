@@ -8,9 +8,10 @@ import { ChevronLeft, ChevronRight, Loader2, Timer as TimerIcon } from "lucide-r
 import { useQuizContext } from "../state/QuizContext";
 import { QuestionCard } from "./QuestionCard";
 import { ResultsSummary } from "./ResultsSummary";
+import type { QuestionResult } from "../types/quiz.types";
 
 export function QuizRunner() {
-    const { quiz, currentIndex, next, prev, selectOption, checkCurrent, answers, checked, finished, loading, timeLeft, results } = useQuizContext() as any;
+    const { quiz, currentIndex, next, prev, selectOption, checkCurrent, answers, checked, finished, loading, timeLeft, results } = useQuizContext();
     const current = quiz?.questions[currentIndex];
 
     if (!quiz) return null;
@@ -23,7 +24,7 @@ export function QuizRunner() {
     const progress = ((currentIndex) / (total - 1)) * 100;
     const isChecked = current ? checked.has(current.id) : false;
     const isCorrect = current && answers.get(current.id) === current.correctOptionId;
-    const timedOut = !!(current && results.find((r: any) => r.questionId === current.id && r.timedOut));
+    const timedOut = !!(current && results.find((r: QuestionResult) => r.questionId === current.id && r.timedOut));
 
     const mm = String(Math.floor((timeLeft ?? 0) / 60)).padStart(2, "0");
     const ss = String((timeLeft ?? 0) % 60).padStart(2, "0");

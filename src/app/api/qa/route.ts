@@ -26,10 +26,8 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json(response, { status: 200 });
-    } catch (err: any) {
-        return NextResponse.json(
-            { error: "Invalid request or model error", details: err?.message ?? "unknown" },
-            { status: 400 }
-        );
+    } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "unknown";
+        return NextResponse.json({ error: "Invalid request or model error", details: msg }, { status: 400 });
     }
 }

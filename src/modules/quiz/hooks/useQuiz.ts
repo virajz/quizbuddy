@@ -36,6 +36,13 @@ export function useQuiz() {
         setAnswers(prev => new Map(prev).set(questionId, optionId));
     }, []);
 
+    // timer controls (moved above checkCurrent for dependency ordering)
+    const stopTimer = useCallback(() => {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        intervalRef.current = null;
+        setIsTiming(false);
+    }, []);
+
     const checkCurrent = useCallback((opts?: { dueToTimeout?: boolean }) => {
         if (!quiz) return { correct: false };
         const q = quiz.questions[currentIndex];
@@ -47,7 +54,7 @@ export function useQuiz() {
         setResults(prev => [...prev, { questionId: q.id, correct, correctOptionId: q.correctOptionId, selectedOptionId: chosen ?? null, timedOut: !!opts?.dueToTimeout }]);
         stopTimer();
         return { correct };
-    }, [quiz, currentIndex, answers, checked]);
+    }, [quiz, currentIndex, answers, checked, stopTimer]);
 
     const next = useCallback(() => {
         setCurrentIndex(i => Math.min((quiz?.questions.length ?? 1) - 1, i + 1));
@@ -67,8 +74,8 @@ export function useQuiz() {
             setQuiz(json.quiz); setCurrentIndex(0); setAnswers(new Map()); setChecked(new Set()); setResults([]); setTimeLeft(QUESTION_TIME_LIMIT_SEC); setIsTiming(false);
             pushHistory(json.quiz);
             return json;
-        } catch (e: any) {
-            setError(e?.message ?? "Failed to generate quiz");
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : "Failed to generate quiz");
             return null;
         } finally { setLoading(false); }
     }
@@ -85,13 +92,6 @@ export function useQuiz() {
         const score = quiz.questions.reduce((acc, q) => acc + (answers.get(q.id) === q.correctOptionId ? 1 : 0), 0);
         return { score };
     }, [quiz, answers]);
-
-    // timer controls
-    const stopTimer = useCallback(() => {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        intervalRef.current = null;
-        setIsTiming(false);
-    }, []);
 
     const startTimerFor = useCallback((questionId: string) => {
         if (!quiz) return;

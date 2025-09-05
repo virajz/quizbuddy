@@ -16,7 +16,7 @@ const ALLOWLIST_DOMAINS = [
     "harvard.edu",
 ];
 
-function sanitizeAndSelectResources(raw: any): AnswerResource[] | undefined {
+function sanitizeAndSelectResources(raw: unknown): AnswerResource[] | undefined {
     if (!Array.isArray(raw)) return undefined;
     const cleaned: AnswerResource[] = [];
 
@@ -59,7 +59,7 @@ function sanitizeAndSelectResources(raw: any): AnswerResource[] | undefined {
     const deduped = cleaned.filter((r) => {
         try {
             const u = new URL(r.url);
-            let key = u.hostname.toLowerCase() + u.pathname.replace(/\/+$/, "");
+            const key = u.hostname.toLowerCase() + u.pathname.replace(/\/+$/, "");
             if (!key) return false;
             if (seen.has(key)) return false;
             seen.add(key);
@@ -84,18 +84,30 @@ function sanitizeAndSelectResources(raw: any): AnswerResource[] | undefined {
 }
 
 export function toAskQuestionResponse(raw: string, meta: { latencyMs: number; model: string }): AskQuestionResponse {
-    let parsed: any;
+    let parsed: unknown;
     try { parsed = JSON.parse(raw); } catch { parsed = {}; }
 
+    type ModelShape = {
+        answer?: {
+            text?: string;
+            keyTerms?: unknown;
+            examples?: unknown;
+            readingLevel?: string;
+            resources?: unknown;
+        };
+    };
+    const model = (typeof parsed === "object" && parsed !== null ? parsed as ModelShape : {});
+    const answerNode = model.answer ?? {};
+
     const answer: AskQuestionResponse["answer"] = {
-        text: parsed?.answer?.text ?? "I couldn't parse a valid answer.",
-        keyTerms: Array.isArray(parsed?.answer?.keyTerms) ? parsed.answer.keyTerms : [],
-        examples: Array.isArray(parsed?.answer?.examples) ? parsed.answer.examples : undefined,
-        readingLevel: parsed?.answer?.readingLevel === "grade9-10" ? "grade9-10" : "grade6-8",
+        text: typeof answerNode.text === "string" ? answerNode.text : "I couldn't parse a valid answer.",
+        keyTerms: Array.isArray(answerNode.keyTerms) ? answerNode.keyTerms.filter(t => typeof t === "string") as string[] : [],
+        examples: Array.isArray(answerNode.examples) ? answerNode.examples.filter(e => typeof e === "string") as string[] : undefined,
+        readingLevel: answerNode.readingLevel === "grade9-10" ? "grade9-10" : "grade6-8",
         // resources sanitized below
     };
 
-    const resources = sanitizeAndSelectResources(parsed?.answer?.resources);
+    const resources = sanitizeAndSelectResources(answerNode.resources);
     if (resources?.length) {
         answer.resources = resources;
     }

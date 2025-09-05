@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo, useState } from "react";
 import { useAskQuestion } from "../hooks/useAskQuestion";
-import type { AskQuestionResponse, HistoryEntry } from "../types/qa.types";
+// removed unused imports (AskQuestionResponse, HistoryEntry)
 
 type QAContextValue = ReturnType<typeof useAskQuestion> & {
     prefillQuestion: string;

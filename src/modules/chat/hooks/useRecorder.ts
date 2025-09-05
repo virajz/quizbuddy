@@ -54,11 +54,12 @@ export function useRecorder(opts: UseRecorderOptions = {}) {
             };
             rec.start();
             setDuration(0); setRecording(true);
-        } catch (e: any) {
-            setPermissionError(e?.message || "Microphone permission denied");
-            opts.onError?.(e);
+        } catch (e: unknown) {
+            const msg = e instanceof Error ? e.message : "Microphone permission denied";
+            setPermissionError(msg);
+            if (e instanceof Error) opts.onError?.(e);
         }
-    }, [opts.mimeType, opts]);
+    }, [opts, recording]);
 
     const stop = useCallback(() => {
         if (!recording) return;

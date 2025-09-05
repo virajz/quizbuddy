@@ -5,7 +5,7 @@ import { app } from "./firebase";
 
 const db = getFirestore(app);
 
-export async function logQAServerEvent(data: Record<string, any>) {
+export async function logQAServerEvent(data: Record<string, unknown>) {
     try {
         await addDoc(collection(db, "qaLogs"), { ...data, ts: serverTimestamp() });
     } catch {
@@ -13,7 +13,7 @@ export async function logQAServerEvent(data: Record<string, any>) {
     }
 }
 
-export async function logQuizEvent(data: Record<string, any>) {
+export async function logQuizEvent(data: Record<string, unknown>) {
     try {
         await addDoc(collection(db, "quizLogs"), { ...data, ts: serverTimestamp() });
     } catch {
@@ -21,7 +21,7 @@ export async function logQuizEvent(data: Record<string, any>) {
     }
 }
 
-export async function logChatEvent(data: Record<string, any>) {
+export async function logChatEvent(data: Record<string, unknown>) {
     try {
         await addDoc(collection(db, "chatLogs"), { ...data, ts: serverTimestamp() });
     } catch {

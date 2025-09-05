@@ -4,7 +4,7 @@ import { useChat } from "../hooks/useChat";
 import { Composer } from "./Composer";
 import { MessageList } from "./MessageList";
 import { Button } from "@/components/ui/button";
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState } from "react";
 import { Loader2, History } from "lucide-react";
 
 export function ChatPanel() {

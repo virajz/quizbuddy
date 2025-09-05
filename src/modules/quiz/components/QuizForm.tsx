@@ -32,7 +32,7 @@ export function QuizForm() {
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div className="grid gap-2">
                             <Label>Level</Label>
-                            <Select value={level} onValueChange={v => setLevel(v as any)}>
+                            <Select value={level} onValueChange={(v: "beginner" | "intermediate") => setLevel(v)}>
                                 <SelectTrigger className="h-11 w-full"><SelectValue placeholder="Level" /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="beginner">Beginner</SelectItem>
@@ -42,7 +42,7 @@ export function QuizForm() {
                         </div>
                         <div className="grid gap-2">
                             <Label>Language</Label>
-                            <Select value={locale} onValueChange={v => setLocale(v as any)}>
+                            <Select value={locale} onValueChange={(v: "en" | "hi" | "gu") => setLocale(v)}>
                                 <SelectTrigger className="h-11 w-full"><SelectValue placeholder="Language" /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="en">English</SelectItem>

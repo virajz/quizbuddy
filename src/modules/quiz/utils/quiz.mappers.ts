@@ -1,24 +1,29 @@
 // /modules/quiz/utils/quiz.mappers.ts
-import type { Quiz, QuizGenerateResponse, QuizOptionId, QuizQuestion } from "../types/quiz.types";
-import { z, ZodIssue } from "zod";
+import type { Quiz, QuizGenerateResponse, QuizOptionId } from "../types/quiz.types";
+import { ZodIssue } from "zod";
 import { quizSchema, validateQuizBusinessRules } from "../validation";
 
-export function parseQuizJSON(raw: string): any {
+export function parseQuizJSON(raw: string): unknown {
     try { return JSON.parse(raw); } catch { return {}; }
 }
 
 export function toQuiz(raw: string, meta: { model: string; latencyMs: number }): QuizGenerateResponse {
-    const parsed = parseQuizJSON(raw);
-    const candidate = parsed?.quiz ?? parsed; // model might omit root key
+    const parsed = parseQuizJSON(raw) as unknown;
+    let candidate: unknown = parsed;
+    if (parsed && typeof parsed === "object" && "quiz" in (parsed as Record<string, unknown>)) {
+        const inner = (parsed as Record<string, unknown>).quiz;
+        if (inner && typeof inner === "object") candidate = inner;
+    }
     // candidate likely missing id/createdAt; we'll inject then validate
-    const base = {
+    const cObj: Record<string, unknown> = (candidate && typeof candidate === "object") ? candidate as Record<string, unknown> : {};
+    const base: unknown = {
         id: crypto.randomUUID(),
         createdAt: Date.now(),
-        topic: candidate?.topic ?? "unknown",
-        level: candidate?.level === "intermediate" ? "intermediate" : "beginner",
-        locale: candidate?.locale === "hi" ? "hi" : candidate?.locale === "gu" ? "gu" : "en",
-        questions: Array.isArray(candidate?.questions) ? candidate.questions : [],
-    } as any;
+        topic: typeof cObj.topic === "string" ? cObj.topic : "unknown",
+        level: cObj.level === "intermediate" ? "intermediate" : "beginner",
+        locale: cObj.locale === "hi" ? "hi" : cObj.locale === "gu" ? "gu" : "en",
+        questions: Array.isArray(cObj.questions as unknown) ? cObj.questions : [],
+    };
     const result = quizSchema.safeParse(base);
     if (!result.success) {
         const issues = result.error.issues.map((i: ZodIssue) => i.message).join("; ");

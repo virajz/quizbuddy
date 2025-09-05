@@ -13,26 +13,29 @@ export async function POST(req: NextRequest) {
     let body: ChatRequest;
     try { body = await req.json(); } catch { return new Response("Invalid JSON", { status: 400 }); }
     if (!body?.messages || !Array.isArray(body.messages)) return new Response("Invalid body", { status: 400 });
-    const prepared = buildRollingContext({ messages: body.messages.map(m => ({ role: m.role, content: m.content })) });
+    // Narrow message role type for Groq API
+    type GroqChatMessage = { role: "system" | "user" | "assistant"; content: string };
+    const prepared = buildRollingContext({ messages: body.messages.map(m => ({ role: m.role, content: m.content })) }) as GroqChatMessage[];
 
     const primaryModel = "llama-3.1-70b-versatile";
     const fallbacks = ["mixtral-8x7b-instruct", "llama-3.1-8b-instant"];
 
-    async function attempt(model: string) {
+    interface StreamDelta { choices?: { delta?: { content?: string } }[] }
+    async function attempt(model: string): Promise<AsyncIterable<StreamDelta>> {
         return groq.chat.completions.create({
             model,
             temperature: 0.3,
             top_p: 0.9,
             stream: true,
-            messages: prepared as any,
-        });
+            messages: prepared,
+        }) as unknown as AsyncIterable<StreamDelta>; // cast due to SDK stream typing
     }
 
-    let streamIterator: AsyncIterable<any> | null = null;
+    let streamIterator: AsyncIterable<StreamDelta> | null = null;
     let chosenModel = primaryModel;
     try {
         streamIterator = await attempt(primaryModel);
-    } catch (e) {
+    } catch {
         for (const fb of fallbacks) {
             try { streamIterator = await attempt(fb); chosenModel = fb; break; } catch { }
         }
@@ -47,16 +50,17 @@ export async function POST(req: NextRequest) {
     const readable = new ReadableStream<Uint8Array>({
         async start(controller) {
             try {
-                for await (const chunk of streamIterator as any) {
-                    const token = chunk?.choices?.[0]?.delta?.content || "";
+                for await (const chunk of streamIterator!) {
+                    const token = chunk?.choices?.[0]?.delta?.content ?? "";
                     if (token) {
                         const payload: ChatStreamChunk = { content: token };
                         controller.enqueue(encoder.encode(JSON.stringify(payload) + "\n"));
                     }
                 }
                 controller.enqueue(encoder.encode(JSON.stringify({ content: "", done: true }) + "\n"));
-            } catch (e: any) {
-                controller.enqueue(encoder.encode(JSON.stringify({ content: "", done: true, error: e?.message || "stream failed" }) + "\n"));
+            } catch (e: unknown) {
+                const msg = e instanceof Error ? e.message : "stream failed";
+                controller.enqueue(encoder.encode(JSON.stringify({ content: "", done: true, error: msg }) + "\n"));
             } finally { controller.close(); }
         }
     });

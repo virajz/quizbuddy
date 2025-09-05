@@ -40,8 +40,8 @@ export function useAskQuestion() {
             setData(json);
             pushHistory({ ...base, response: json });
             return json;
-        } catch (e: any) {
-            setError(e?.message ?? "Request failed");
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : "Request failed");
             pushHistory(base); // store failed attempt (no response)
             return null;
         } finally {
