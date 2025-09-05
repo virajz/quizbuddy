@@ -34,3 +34,12 @@ export type QuizGradeResponse = {
     score: number; // 0..5
     breakdown: { questionId: string; correct: boolean; correctOptionId: QuizOptionId; explanation: string }[];
 };
+
+// Extended per-question result (client-side) for timing + selection outcomes
+export type QuestionResult = {
+    questionId: string;
+    correct: boolean;
+    correctOptionId: QuizOptionId;
+    selectedOptionId?: QuizOptionId | null;
+    timedOut?: boolean; // true if marked incorrect because time elapsed before checking
+};

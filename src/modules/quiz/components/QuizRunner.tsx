@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Timer as TimerIcon } from "lucide-react";
 import { useQuizContext } from "../state/QuizContext";
 import { QuestionCard } from "./QuestionCard";
 import { ResultsSummary } from "./ResultsSummary";
 
 export function QuizRunner() {
-    const { quiz, currentIndex, next, prev, selectOption, checkCurrent, answers, checked, finished, loading } = useQuizContext() as any;
+    const { quiz, currentIndex, next, prev, selectOption, checkCurrent, answers, checked, finished, loading, timeLeft, results } = useQuizContext() as any;
     const current = quiz?.questions[currentIndex];
 
     if (!quiz) return null;
@@ -23,6 +23,11 @@ export function QuizRunner() {
     const progress = ((currentIndex) / (total - 1)) * 100;
     const isChecked = current ? checked.has(current.id) : false;
     const isCorrect = current && answers.get(current.id) === current.correctOptionId;
+    const timedOut = !!(current && results.find((r: any) => r.questionId === current.id && r.timedOut));
+
+    const mm = String(Math.floor((timeLeft ?? 0) / 60)).padStart(2, "0");
+    const ss = String((timeLeft ?? 0) % 60).padStart(2, "0");
+    const timeFormatted = `${mm}:${ss}`;
 
     return (
         <Card>
@@ -36,6 +41,10 @@ export function QuizRunner() {
             <CardContent className="space-y-4">
                 <div className="flex items-center gap-3">
                     <Progress value={progress} className="flex-1" />
+                    <div className="flex items-center gap-2 text-sm font-mono">
+                        <TimerIcon className={`h-4 w-4 ${isChecked ? "text-muted-foreground" : "text-primary"}`} />
+                        <span className="tabular-nums w-[48px] text-right">{timeFormatted}</span>
+                    </div>
                     <div className="text-sm tabular-nums">{currentIndex + 1}/{total}</div>
                 </div>
                 {loading && !finished ? (
@@ -48,6 +57,7 @@ export function QuizRunner() {
                         onCheck={() => checkCurrent()}
                         checked={isChecked}
                         correct={isCorrect}
+                        timedOut={timedOut}
                     />
                 ) : null}
                 <div className="flex justify-between pt-2">
