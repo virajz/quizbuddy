@@ -120,7 +120,28 @@ export function useChat() {
         // auto-scroll handled in MessageList; just dependency placeholder
     }, [messages]);
 
-    return { messages, input, setInput, loading, streaming, error, sessionId, send, stop, regenerate, clear, transcribeAndSend, history, transcribing, focusCounter };
+    const loadSession = useCallback((id: string) => {
+        try {
+            if (id === sessionId) return; // already active
+            if (messages.length) {
+                // archive current before switching (excluding system)
+                archiveSession(sessionId, messages.filter(m => m.role !== "system"));
+            }
+            const list = loadChatHistory();
+            const entry = list.find(e => e.id === id);
+            if (!entry) return;
+            setSessionId(entry.id);
+            setMessages(entry.messages.map(m => ({ ...m }))); // clone
+            setInput("");
+            setError(null);
+            setStreaming(false); setLoading(false); setTranscribing(false);
+            setHistory(loadChatHistory());
+        } catch (e: any) {
+            setError(e?.message || "Failed to load session");
+        }
+    }, [messages, sessionId]);
+
+    return { messages, input, setInput, loading, streaming, error, sessionId, send, stop, regenerate, clear, transcribeAndSend, history, transcribing, focusCounter, loadSession };
 }
 
 async function blobToBase64(blob: Blob) {
