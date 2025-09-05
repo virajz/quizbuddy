@@ -29,7 +29,7 @@ export function QuestionCard({ question, selected, onSelect, onCheck, checked, c
         <Card onKeyDown={handleKey} tabIndex={0} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <CardContent className="space-y-4 p-4">
                 <div className="text-lg font-medium leading-relaxed" aria-live="polite">{question.stem}</div>
-                <RadioGroup value={selected} onValueChange={v => !disabled && onSelect(v as QuizOptionId)} className="space-y-2">
+                <RadioGroup key={question.id} value={selected ?? ""} onValueChange={v => !disabled && onSelect(v as QuizOptionId)} className="space-y-2">
                     {question.options.map(opt => (
                         <label key={opt.id} className={`flex items-start gap-3 rounded-md border p-2 cursor-pointer hover:bg-muted/40 ${disabled ? "opacity-80" : ""} ${selected === opt.id ? "border-primary" : ""}`}>
                             <RadioGroupItem value={opt.id} id={`${question.id}_${opt.id}`} disabled={disabled} />

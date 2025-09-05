@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Wand2 } from "lucide-react";
+import { Wand2, Loader2 } from "lucide-react";
 import type { QuizGenerateRequest } from "../types/quiz.types";
 import { useQuizContext } from "../state/QuizContext";
 
@@ -56,7 +56,9 @@ export function QuizForm() {
                         <Label htmlFor="topic">Topic</Label>
                         <div className="relative">
                             <Input id="topic" value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. algebra basics" className="h-11 pr-12" />
-                            <Button type="submit" disabled={loading || !topic.trim()} className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 p-0" aria-label="Generate quiz"><Wand2 className="h-4 w-4" /></Button>
+                            <Button type="submit" disabled={loading || !topic.trim()} className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 p-0" aria-label="Generate quiz">
+                                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                            </Button>
                         </div>
                     </div>
                     {error ? <p className="text-sm text-red-600">{error}</p> : null}

@@ -4,7 +4,6 @@ import { NextRequest } from "next/server";
 import { groq, MODEL_DEFAULT } from "@/lib/groq";
 import { buildQuizPrompt } from "@/modules/quiz/utils/quiz.prompts";
 import { quizGenerateRequestSchema, quizSchema, validateQuizBusinessRules } from "@/modules/quiz/validation";
-import { logQuizEvent } from "@/lib/firebase.server";
 
 export const runtime = "nodejs";
 
@@ -45,8 +44,6 @@ export async function POST(req: NextRequest) {
         const valid = quizSchema.parse(quizData);
         validateQuizBusinessRules(valid);
         const response = { quiz: valid, metadata: { model: process.env.GROQ_MODEL_QUIZ ?? MODEL_DEFAULT, latencyMs } };
-        // non-blocking log
-        logQuizEvent({ type: "quiz_generated", topic: input.topic, level: input.level, locale: input.locale, latencyMs }).catch(() => { });
         return new Response(JSON.stringify(response), { status: 200, headers: { "Content-Type": "application/json" } });
     } catch (e: any) {
         return new Response(e?.message ?? "Generation failed", { status: 500 });
