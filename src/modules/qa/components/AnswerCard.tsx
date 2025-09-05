@@ -1,6 +1,5 @@
 // /modules/qa/components/AnswerCard.tsx
 "use client";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { AskQuestionResponse } from "../types/qa.types";
 
@@ -8,9 +7,7 @@ export function AnswerCard({ answer }: { answer: AskQuestionResponse["answer"] }
     if (!answer?.text) return null;
     return (
         <Card>
-            <CardHeader>
-                <CardTitle>Explanation</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Explanation</CardTitle></CardHeader>
             <CardContent className="space-y-3">
                 <p className="leading-7">{answer.text}</p>
                 {answer.keyTerms?.length ? (
@@ -21,9 +18,7 @@ export function AnswerCard({ answer }: { answer: AskQuestionResponse["answer"] }
                     </div>
                 ) : null}
                 {answer.examples?.length ? (
-                    <div className="text-sm opacity-80">
-                        <strong>Example:</strong> {answer.examples[0]}
-                    </div>
+                    <div className="text-sm opacity-80"><strong>Example:</strong> {answer.examples[0]}</div>
                 ) : null}
             </CardContent>
         </Card>

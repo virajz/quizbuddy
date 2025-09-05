@@ -1,16 +1,15 @@
 // /modules/qa/types/qa.types.ts
 export type Answer = {
-    text: string;                 // concise explanation (120–150 words target)
-    keyTerms: string[];           // e.g., ["photosynthesis", "chlorophyll"]
-    examples?: string[];          // one concrete example encouraged
+    text: string;
+    keyTerms: string[];
+    examples?: string[];
     readingLevel: "grade6-8" | "grade9-10";
-    cached: boolean;              // semantic cache hit (if implemented later)
 };
 
 export type AskQuestionRequest = {
     question: string;
-    level?: "beginner" | "intermediate";
-    locale?: string;              // e.g., "en-IN"
+    level: "beginner" | "intermediate";
+    locale: "en" | "hi" | "gu"; // en: English, hi: Hindi, gu: Gujarati
 };
 
 export type AskQuestionResponse = {
@@ -20,4 +19,11 @@ export type AskQuestionResponse = {
         model?: string;
         latencyMs?: number;
     };
+};
+
+export type HistoryEntry = {
+    id: string;
+    timestamp: number;
+    request: AskQuestionRequest;
+    response: AskQuestionResponse | null; // null if failed
 };
